@@ -1,66 +1,98 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Stage 01
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+1. Create a PHP REST API endpoint to process “New Order” with an authentication.
+******** For the authentication I have used laraval passport
+Login creadentials
+Email: admin@nvision.com
+Password: Nvision2024#
 
-## About Laravel
+API - {{baseUrl}}/api/login
+Method - POST
+Body - 
+{
+    "email": "admin@archnix.com",
+    "password": "Nvision2024#"
+}
+Response - User details and bearer token
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+i. API body should contain at least two parameters. 
+(Customer Name, Order Value)
+********
+Authentication - bearer token
+API - {{BaseURL}}/api/order
+Method - POST
+Body -
+{
+    "customer_name":"sampath",
+    "order_value":"100"
+}
 
-## Learning Laravel
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+ii. PHP code should follow the MVC design pattern. (You are free to use the Laravel 
+framework)
+********Used MVC pattern and for the validaions I have used Requests folder and additionaly Services folder also created
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+iii. After invoking the API, the data should be stored in the MYSQL database.
+********Table - Orders (Need to run migrations)
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+iv. API response should include Order ID, Process ID & Status parameters. “Ordre ID” is a 
+Unique identification for an order. “Process ID” needs to be randomly pickup id from the 
+ID pool between 1-10. 
+********
+Ordre ID - Auto Increament
+Process ID - Used Random function 1- 10
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. After completing the order, details need to submit to the below 3
+rd party API endpoint.
+Type = REST
+Method = POST/JSON
+API Endpoint URL = https://wibip.free.beeceptor.com/order
+Parameters =>
+{
+ "Order_ID": "0001",
+ "Customer_Name": "Jhone",
+"Order_Value": 250.00,
+"Order_Date": "2023-02-15 10:12:42",
+"Order_Status": "Processing",
+"Process_ID": "4"
+}
+********
 
-## Code of Conduct
+Implemented in apps/jobs/ProcessOrder.php file
+implemented Que handleing also
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
+Stage 02
+3. Based on the high demand for API requests, suggest a method to queue the API requests into 
+the server. (Ex: new orders should wait until the configured number of parallel requests are 
+reached)
+******
+To handle a high demand for API requests and ensure that new orders wait until the configured number of parallel requests are reached, we can use Laravel's built-in queue system. This system allows us to process jobs (in this case, API requests) asynchronously and limit the number of concurrent jobs being processed.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Queue Configuration: Setting up Laravel's queue system using the database driver.
+Job Creation: Creating a job that handles the API request to the third-party endpoint.
+Job Dispatching: Dispatching the job when a new order is created.
+Worker Management: Running a queue worker to process the jobs, with options to limit concurrency and manage resources.
 
-## License
+This approach ensures that API requests are queued and processed efficiently, preventing the server from being overwhelmed by high demand and allowing for better scalability and reliability.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+4. Create a simple web form with 3 input parameters. After submitting the form, values should be 
+stored in browser-based “Indexed DB”. Create a simple data table to view the above 
+information from “Indexed DB”. 
+
+****
+Create the web route pointing index.php in resources/views/index.blade.php
+Route::get('/', function () {
+    return view('index');
+});
+
+adn create the javascript file to create the indexdb functions located in public/js/script.js
